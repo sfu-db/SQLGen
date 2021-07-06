@@ -1,0 +1,8 @@
+featuretools
+scikit-learn
+jupyter
+hyperopt
+scikit-optimize
+psycopg2
+graphviz
+colorlog
