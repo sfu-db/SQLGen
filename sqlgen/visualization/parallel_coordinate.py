@@ -18,7 +18,9 @@ if is_available():
 logger = get_logger(__name__)
 
 
-def plot_parallel_coordinate(study: Study, params: Optional[List[str]] = None) -> "go.Figure":
+def plot_parallel_coordinate(
+    study: Study, params: Optional[List[str]] = None
+) -> "go.Figure":
     """Plot the high-dimentional parameter relationships in a study.
 
     Note that, If a parameter contains missing values, a trial with missing values is not plotted.
@@ -62,9 +64,13 @@ def plot_parallel_coordinate(study: Study, params: Optional[List[str]] = None) -
     return _get_parallel_coordinate_plot(study, params)
 
 
-def _get_parallel_coordinate_plot(study: Study, params: Optional[List[str]] = None) -> "go.Figure":
+def _get_parallel_coordinate_plot(
+    study: Study, params: Optional[List[str]] = None
+) -> "go.Figure":
 
-    layout = go.Layout(title="Parallel Coordinate Plot",)
+    layout = go.Layout(
+        title="Parallel Coordinate Plot",
+    )
 
     trials = [trial for trial in study.trials if trial.state == TrialState.COMPLETE]
 
@@ -76,7 +82,9 @@ def _get_parallel_coordinate_plot(study: Study, params: Optional[List[str]] = No
     if params is not None:
         for input_p_name in params:
             if input_p_name not in all_params:
-                raise ValueError("Parameter {} does not exist in your study.".format(input_p_name))
+                raise ValueError(
+                    "Parameter {} does not exist in your study.".format(input_p_name)
+                )
         all_params = set(params)
     sorted_params = sorted(list(all_params))
 

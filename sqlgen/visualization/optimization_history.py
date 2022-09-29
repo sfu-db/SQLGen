@@ -70,7 +70,11 @@ def _get_optimization_history_plot(study):
         logger.warning("Study instance does not contain trials.")
         return go.Figure(data=[], layout=layout)
 
-    best_values = [float("inf")] if study.direction == StudyDirection.MINIMIZE else [-float("inf")]
+    best_values = (
+        [float("inf")]
+        if study.direction == StudyDirection.MINIMIZE
+        else [-float("inf")]
+    )
     comp = min if study.direction == StudyDirection.MINIMIZE else max
     for trial in trials:
         trial_value = trial.value

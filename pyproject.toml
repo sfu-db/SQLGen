@@ -5,10 +5,16 @@ description = ""
 authors = ["qidanrui <qidanrui@gmail.com>"]
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = ">=3.8,<3.11"
 optuna = "^2.10.1"
 featuretools = "^1.13.0"
 psycopg2 = "^2.9.3"
+scipy = "1.8.0"
+duckdb = "^0.5.1"
+xgboost = "^1.6.2"
+black = "^22.8.0"
+pylint = "^2.15.3"
+mypy = "^0.971"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"

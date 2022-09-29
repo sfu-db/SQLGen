@@ -67,7 +67,9 @@ def plot_slice(study, params=None):
 def _get_slice_plot(study, params=None):
     # type: (Study, Optional[List[str]]) -> go.Figure
 
-    layout = go.Layout(title="Slice Plot",)
+    layout = go.Layout(
+        title="Slice Plot",
+    )
 
     trials = [trial for trial in study.trials if trial.state == TrialState.COMPLETE]
 
@@ -81,14 +83,17 @@ def _get_slice_plot(study, params=None):
     else:
         for input_p_name in params:
             if input_p_name not in all_params:
-                raise ValueError("Parameter {} does not exist in your study.".format(input_p_name))
+                raise ValueError(
+                    "Parameter {} does not exist in your study.".format(input_p_name)
+                )
         sorted_params = sorted(list(set(params)))
 
     n_params = len(sorted_params)
 
     if n_params == 1:
         figure = go.Figure(
-            data=[_generate_slice_subplot(study, trials, sorted_params[0])], layout=layout
+            data=[_generate_slice_subplot(study, trials, sorted_params[0])],
+            layout=layout,
         )
         figure.update_xaxes(title_text=sorted_params[0])
         figure.update_yaxes(title_text="Objective Value")
@@ -100,7 +105,9 @@ def _get_slice_plot(study, params=None):
         showscale = True  # showscale option only needs to be specified once.
         for i, param in enumerate(sorted_params):
             trace = _generate_slice_subplot(study, trials, param)
-            trace.update(marker={"showscale": showscale})  # showscale's default is True.
+            trace.update(
+                marker={"showscale": showscale}
+            )  # showscale's default is True.
             if showscale:
                 showscale = False
             figure.add_trace(trace, row=1, col=i + 1)
@@ -124,7 +131,10 @@ def _generate_slice_subplot(study, trials, param):
         y=[t.value for t in trials if param in t.params],
         mode="markers",
         marker={
-            "line": {"width": 0.5, "color": "Grey",},
+            "line": {
+                "width": 0.5,
+                "color": "Grey",
+            },
             "color": [t.number for t in trials if param in t.params],
             "colorscale": "Blues",
             "colorbar": {

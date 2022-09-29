@@ -67,7 +67,9 @@ def plot_contour(study: Study, params: Optional[List[str]] = None) -> "go.Figure
 
 def _get_contour_plot(study: Study, params: Optional[List[str]] = None) -> "go.Figure":
 
-    layout = go.Layout(title="Contour Plot",)
+    layout = go.Layout(
+        title="Contour Plot",
+    )
 
     trials = [trial for trial in study.trials if trial.state == TrialState.COMPLETE]
 
@@ -84,7 +86,9 @@ def _get_contour_plot(study: Study, params: Optional[List[str]] = None) -> "go.F
     else:
         for input_p_name in params:
             if input_p_name not in all_params:
-                raise ValueError("Parameter {} does not exist in your study.".format(input_p_name))
+                raise ValueError(
+                    "Parameter {} does not exist in your study.".format(input_p_name)
+                )
         sorted_params = sorted(list(set(params)))
 
     param_values_range = {}
@@ -107,7 +111,10 @@ def _get_contour_plot(study: Study, params: Optional[List[str]] = None) -> "go.F
             figure.update_yaxes(range=log_range, type="log")
     else:
         figure = make_subplots(
-            rows=len(sorted_params), cols=len(sorted_params), shared_xaxes=True, shared_yaxes=True
+            rows=len(sorted_params),
+            cols=len(sorted_params),
+            shared_xaxes=True,
+            shared_yaxes=True,
         )
         figure.update_layout(layout)
         showscale = True  # showscale option only needs to be specified once
@@ -126,14 +133,22 @@ def _get_contour_plot(study: Study, params: Optional[List[str]] = None) -> "go.F
                         showscale = False
                     figure.add_trace(contour, row=y_i + 1, col=x_i + 1)
                     figure.add_trace(scatter, row=y_i + 1, col=x_i + 1)
-                figure.update_xaxes(range=param_values_range[x_param], row=y_i + 1, col=x_i + 1)
-                figure.update_yaxes(range=param_values_range[y_param], row=y_i + 1, col=x_i + 1)
+                figure.update_xaxes(
+                    range=param_values_range[x_param], row=y_i + 1, col=x_i + 1
+                )
+                figure.update_yaxes(
+                    range=param_values_range[y_param], row=y_i + 1, col=x_i + 1
+                )
                 if _is_log_scale(trials, x_param):
                     log_range = [math.log10(p) for p in param_values_range[x_param]]
-                    figure.update_xaxes(range=log_range, type="log", row=y_i + 1, col=x_i + 1)
+                    figure.update_xaxes(
+                        range=log_range, type="log", row=y_i + 1, col=x_i + 1
+                    )
                 if _is_log_scale(trials, y_param):
                     log_range = [math.log10(p) for p in param_values_range[y_param]]
-                    figure.update_yaxes(range=log_range, type="log", row=y_i + 1, col=x_i + 1)
+                    figure.update_yaxes(
+                        range=log_range, type="log", row=y_i + 1, col=x_i + 1
+                    )
                 if x_i == 0:
                     figure.update_yaxes(title_text=y_param, row=y_i + 1, col=x_i + 1)
                 if y_i == len(sorted_params) - 1:
@@ -171,7 +186,9 @@ def _generate_contour_subplot(
             value = trial.value
         else:
             raise ValueError(
-                "Trial{} has COMPLETE state, but its value is non-numeric.".format(trial.number)
+                "Trial{} has COMPLETE state, but its value is non-numeric.".format(
+                    trial.number
+                )
             )
         z[y_i][x_i] = value
 
@@ -196,7 +213,11 @@ def _generate_contour_subplot(
     )
 
     scatter = go.Scatter(
-        x=x_values, y=y_values, marker={"color": "black"}, mode="markers", showlegend=False
+        x=x_values,
+        y=y_values,
+        marker={"color": "black"},
+        mode="markers",
+        showlegend=False,
     )
 
     return (contour, scatter)
