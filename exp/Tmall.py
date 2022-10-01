@@ -2,6 +2,7 @@ import pandas as pd
 import os
 import sys
 import warnings
+import time
 import numpy as np
 
 
@@ -74,32 +75,34 @@ if __name__ == "__main__":
     print(len(user_log["age_range"].unique()))
     print(len(user_log["action_type"].unique()))
     print(len(user_log["time_stamp"].unique()))
-    # fkeys = ['user_id', 'merchant_id']
     fkeys = ["user_id"]
+    # fkeys = ["user_id"]
     agg_funcs = ["SUM", "MIN", "MAX", "COUNT", "AVG"]
     agg_attrs = ["merchant_id", "item_id", "brand_id", "cat_id"]
-    # predicate_attrs = ['gender', 'age_range', 'action_type', 'time_stamp']
+    predicate_attrs = ["gender", "age_range", "action_type", "time_stamp"]
 
     # predicate_attrs = ['time_stamp']
-    predicate_attrs = []
+    # predicate_attrs = []
     groupby_keys = fkeys
     predicate_attr_types = {
-        # 'gender': {
-        #     'type': 'categorical',
-        #     'choices': [str(x) for x in user_log['gender'].unique()] + ['None']
-        # },
-        # 'age_range': {
-        #     'type': 'categorical',
-        #     'choices': [str(x) for x in user_log['age_range'].unique()] + ['None']
-        # },
-        # 'action_type': {
-        #     'type': 'categorical',
-        #     'choices': [str(x) for x in user_log['action_type'].unique()] + ['None']
-        # },
-        # 'time_stamp': {
-        #     'type': 'datetime',
-        #     'choices': [str(x) for x in user_log['time_stamp'].unique()] + ['None']
-        # },
+        "gender": {
+            "type": "categorical",
+            "choices": [str(x) for x in user_log["gender"].unique()] + ["None"],
+        },
+        "age_range": {
+            "type": "categorical",
+            "choices": [str(x) for x in user_log["age_range"].unique()] + ["None"],
+        },
+        "action_type": {
+            "type": "categorical",
+            "choices": [str(x) for x in user_log["action_type"].unique()] + ["None"],
+        },
+        "time_stamp": {
+            "type": "datetime",
+            "choices": [str(x) for x in user_log["time_stamp"].unique()] + ["None"]
+            #'low': int(min(user_log['time_stamp'].unique())),
+            #'high': int(max(user_log['time_stamp'].unique())),
+        },
     }
     query_template = QueryTemplate(
         fkeys=fkeys,
@@ -117,16 +120,22 @@ if __name__ == "__main__":
         labels=train_labels,
         relevant_table=user_log,
     )
+    start = time.time()
     for seed in seed_list[:1]:
         optimal_query_list = sqlgen_task.optimize(
             outer_budget=5,
-            base_tpe_budget=1500,
-            turn_on_mi=False,
-            turn_on_mapping_func=False,
+            mi_budget=500,
+            mi_topk=300,
+            base_tpe_budget=500,
+            turn_on_mi=True,
+            turn_on_mapping_func=True,
+            seed=3709,
         )
         test_score = evaluate_test_data(
             train_data, train_labels, test_data, test_labels, optimal_query_list
         )
         test_score_list.append(test_score)
+    end = time.time()
 
     print(f"The average test score is: {sum(test_score_list) / len(test_score_list)}")
+    print(f"Execution time: {end - start}")

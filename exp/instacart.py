@@ -290,34 +290,36 @@ def evaluate_test_data(
 
 if __name__ == "__main__":
     train_data, train_labels, test_data, test_labels, user_log = load_data()
-    seed_list = [0, 89, 143, 572, 1024]
+    seed_list = [0, 89, 572, 1024, 3709]
     test_score_list = []
 
     fkeys = ["user_id"]
     agg_funcs = ["SUM", "MIN", "MAX", "COUNT", "AVG"]
     agg_attrs = ["product_name", "order_dow"]
-    # predicate_attrs = ['product_name', 'department_id', 'order_dow', 'days_since_prior_order']
+    predicate_attrs = [
+        "product_name",
+        "department_id",
+        "order_dow",
+        "days_since_prior_order",
+    ]
     # predicate_attrs = ['days_since_prior_order']
-    predicate_attrs = []
+    # predicate_attrs = []
 
     groupby_keys = fkeys
     predicate_attr_types = {
-        # 'product_name': {
-        #     'type': 'categorical',
-        #     'choices': [str(x) for x in user_log['product_name'].unique()] + ['None']
-        # },
-        # 'department_id': {
-        #     'type': 'categorical',
-        #     'choices': [str(x) for x in user_log['department_id'].unique()] + ['None']
-        # },
-        # 'order_dow': {
-        #     'type': 'categorical',
-        #     'choices': [str(x) for x in user_log['order_dow'].unique()] + ['None']
-        # },
-        # 'days_since_prior_order': {
-        #     'type': 'datetime',
-        #     'choices': [str(x) for x in user_log['days_since_prior_order'].unique()] + ['None']
-        # },
+        "product_name": {
+            "type": "categorical",
+            "choices": [str(x) for x in user_log["product_name"].unique()] + ["None"],
+        },
+        "department_id": {
+            "type": "categorical",
+            "choices": [str(x) for x in user_log["department_id"].unique()] + ["None"],
+        },
+        "order_dow": {
+            "type": "categorical",
+            "choices": [str(x) for x in user_log["order_dow"].unique()] + ["None"],
+        },
+        "days_since_prior_order": {"type": "int", "low": 0, "high": 30},
     }
     query_template = QueryTemplate(
         fkeys=fkeys,
@@ -335,13 +337,16 @@ if __name__ == "__main__":
         labels=train_labels,
         relevant_table=user_log,
     )
-    for seed in seed_list[:1]:
+    for seed in seed_list[3:4]:
         optimal_query_list = sqlgen_task.optimize(
             ml_model="rf",
             metric="accuracy",
-            base_tpe_budget=1500,
-            turn_on_mi=False,
-            turn_on_mapping_func=False,
+            mi_budget=500,
+            mi_topk=300,
+            base_tpe_budget=500,
+            turn_on_mi=True,
+            turn_on_mapping_func=True,
+            seed=0,
         )
         test_score = evaluate_test_data(
             train_data, train_labels, test_data, test_labels, optimal_query_list

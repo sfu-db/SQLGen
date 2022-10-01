@@ -9,6 +9,8 @@ from optuna.samplers import TPESampler, RandomSampler
 from optuna.trial import FrozenTrial
 from optuna.trial import create_trial
 from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.linear_model import LinearRegression
 from xgboost import XGBClassifier
 from sklearn.model_selection import cross_validate
 from sklearn.feature_selection import mutual_info_classif
@@ -76,20 +78,29 @@ class SQLGen(object):
         turn_on_mapping_func: bool = True,
         mapping_func: str = "RandomForest",
         seed: int = 0,
+        mi_seeds: List = [572, 1567, 2711, 25, 5737],
     ) -> Optional[List]:
 
         self.ml_model = ml_model
         self.metric = metric
         self.optimal_query_list = []
 
+        # mi_seeds = [572, 1567, 2711, 25, 5737]
+        # mi_seeds = [89, 572, 1024, 25, 3709]
+        mi_seeds_pos = 0
+
         while outer_budget > 0:
             start = time.time()
             observed_query_list = []
             if turn_on_mi:
                 mi_study = optuna.create_study(
-                    direction="maximize", sampler=TPESampler()
+                    direction="maximize",
+                    sampler=TPESampler(
+                        n_startup_trials=20, seed=mi_seeds[mi_seeds_pos]
+                    ),
                 )
                 mi_study.optimize(self._mi_objective_func, n_trials=mi_budget)
+                mi_seeds_pos += 1
                 # Change for loop according to frozen trials
                 mi_trials = mi_study.get_trials()
                 topk_mi_trials = self._rank_trials(mi_trials)[:mi_topk]
@@ -224,13 +235,6 @@ class SQLGen(object):
             new_feature_after_join, self.labels, random_state=0
         )
 
-        # 是不是不应该这么粗暴地去重？？
-        # for x in res_x:
-        #     if args == x:
-        #         mi_score = 0
-        #         break
-
-        # print(args, "MI:", mi_score)
         return mi_score
 
     def _get_real_evaluation(self, param):
@@ -566,6 +570,8 @@ class SQLGen(object):
     def _learn_mapping_func(self, observed_query_list: Optional[List] = None) -> Any:
         X = np.array([x["mi_value"] for x in observed_query_list])
         y = np.array([x["real_value"] for x in observed_query_list])
-        clf = RandomForestRegressor(random_state=0)
+        # clf = RandomForestRegressor(random_state=0)
+        clf = DecisionTreeRegressor(max_depth=2, random_state=0)
+        # clf = LinearRegression()
         clf.fit(X.reshape(-1, 1), y)
         return clf
